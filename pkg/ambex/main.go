@@ -66,6 +66,7 @@ import (
 	ecp_cache_types "github.com/datawire/ambassador/v2/pkg/envoy-control-plane/cache/types"
 	ecp_v3_cache "github.com/datawire/ambassador/v2/pkg/envoy-control-plane/cache/v3"
 	ecp_log "github.com/datawire/ambassador/v2/pkg/envoy-control-plane/log"
+	ecp_v3_resource "github.com/datawire/ambassador/v2/pkg/envoy-control-plane/resource/v3"
 	ecp_v3_server "github.com/datawire/ambassador/v2/pkg/envoy-control-plane/server/v3"
 
 	// Envoy API v3
@@ -481,14 +482,19 @@ func update(
 
 	version := fmt.Sprintf("v%d", curgen)
 
-	snapshotv3 := ecp_v3_cache.NewSnapshot(version,
-		endpointsv3,
-		clustersv3,
-		routesv3,
-		listenersv3,
-		runtimesv3,
-		nil, // secrets
-	)
+	snapshotResources := map[ecp_v3_resource.Type][]ecp_cache_types.Resource{
+		ecp_v3_resource.EndpointType: endpointsv3,
+		ecp_v3_resource.ClusterType:  clustersv3,
+		ecp_v3_resource.RouteType:    routesv3,
+		ecp_v3_resource.ListenerType: listenersv3,
+		ecp_v3_resource.RuntimeType:  runtimesv3,
+	}
+
+	snapshotv3, err := ecp_v3_cache.NewSnapshot(version, snapshotResources)
+	if err != nil {
+		dlog.Errorf(ctx, "V3 Snapshot error: %v", err)
+		return nil // TODO: should we return the error, rather than just logging it?
+	}
 
 	if err := snapshotv3.Consistent(); err != nil {
 		bs, _ := json.Marshal(snapshotv3)
@@ -506,7 +512,7 @@ func update(
 	update := Update{version, func() error {
 		dlog.Debugf(ctx, "Accepting snapshot %s", version)
 
-		err := configv3.SetSnapshot("test-id", snapshotv3)
+		err := configv3.SetSnapshot(ctx, "test-id", snapshotv3)
 		if err != nil {
 			return fmt.Errorf("v3 Snapshot error %q for %+v", err, snapshotv3)
 		}
@@ -573,9 +579,9 @@ func (l logAdapterV3) OnStreamRequest(sid int64, req *v3discovery.DiscoveryReque
 }
 
 // OnStreamResponse implements ecp_v3_server.Callbacks.
-func (l logAdapterV3) OnStreamResponse(sid int64, req *v3discovery.DiscoveryRequest, res *v3discovery.DiscoveryResponse) {
-	dlog.Debugf(context.TODO(), "V3 Stream response[%v] for type %s: returning %d resources", sid, res.TypeUrl, len(res.Resources))
-	dlog.Debugf(context.TODO(), "V3 Stream dump response[%v]: %v -> %v", sid, req, res)
+func (l logAdapterV3) OnStreamResponse(context context.Context, sid int64, req *v3discovery.DiscoveryRequest, res *v3discovery.DiscoveryResponse) {
+	dlog.Debugf(context, "V3 Stream response[%v] for type %s: returning %d resources", sid, res.TypeUrl, len(res.Resources))
+	dlog.Debugf(context, "V3 Stream dump response[%v]: %v -> %v", sid, req, res)
 }
 
 // OnDeltaStreamOpen implements ecp_v3_server.Callbacks.
