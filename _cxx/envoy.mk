@@ -13,7 +13,7 @@ RSYNC_EXTRAS ?=
 
 # IF YOU MESS WITH ANY OF THESE VALUES, YOU MUST RUN `make update-base`.
   ENVOY_REPO ?= $(if $(IS_PRIVATE),git@github.com:datawire/envoy-private.git,https://github.com/datawire/envoy.git)
-  ENVOY_COMMIT ?= 4ce93dc3ace00ae9108b179d0afaceac13f4602a
+  ENVOY_COMMIT ?= 386367b8c99f843fbc2a42a38fe625fce480de19
   ENVOY_COMPILATION_MODE ?= opt
   # Increment BASE_ENVOY_RELVER on changes to `docker/base-envoy/Dockerfile`, or Envoy recipes.
   # You may reset BASE_ENVOY_RELVER when adjusting ENVOY_COMMIT.
@@ -221,16 +221,16 @@ envoy-shell: $(ENVOY_BASH.deps)
 # These targets are depended on by `make generate` in `build-aux/generate.mk`.
 
 # Raw protobufs
-$(OSS_HOME)/api/envoy $(OSS_HOME)/api/pb: $(OSS_HOME)/api/%: $(OSS_HOME)/_cxx/envoy
+$(OSS_HOME)/api/envoy : $(OSS_HOME)/api/%: $(OSS_HOME)/_cxx/envoy
 	rsync --recursive --delete --delete-excluded --prune-empty-dirs --include='*/' --include='*.proto' --exclude='*' $</api/$*/ $@
 
 # Go generated from the protobufs
 $(OSS_HOME)/_cxx/envoy/build_go: $(ENVOY_BASH.deps) FORCE
 	$(call ENVOY_BASH.cmd, \
-	    $(ENVOY_DOCKER_EXEC) python3 -c 'from tools.api.generate_go_protobuf import generateProtobufs; generateProtobufs("/root/envoy/build_go")'; \
+	    $(ENVOY_DOCKER_EXEC) python3 -c 'from tools.api.generate_go_protobuf import generate_protobufs; generate_protobufs("@envoy_api//...", "/root/envoy/build_go", "envoy_api")'; \
 	)
 	test -d $@ && touch $@
-$(OSS_HOME)/pkg/api/pb $(OSS_HOME)/pkg/api/envoy: $(OSS_HOME)/pkg/api/%: $(OSS_HOME)/_cxx/envoy/build_go
+$(OSS_HOME)/pkg/api/envoy: $(OSS_HOME)/pkg/api/%: $(OSS_HOME)/_cxx/envoy/build_go
 	rm -rf $@
 	@PS4=; set -ex; { \
 	  unset GIT_DIR GIT_WORK_TREE; \
@@ -241,7 +241,6 @@ $(OSS_HOME)/pkg/api/pb $(OSS_HOME)/pkg/api/envoy: $(OSS_HOME)/pkg/api/%: $(OSS_H
 	    -exec chmod 644 {} + \
 	    -exec sed -E -i.bak \
 	      -e 's,github\.com/envoyproxy/go-control-plane/envoy,github.com/datawire/ambassador/v2/pkg/api/envoy,g' \
-	      -e 's,github\.com/envoyproxy/go-control-plane/pb,github.com/datawire/ambassador/v2/pkg/api/pb,g' \
 	      -- {} +; \
 	  find "$$tmpdir" -name '*.bak' -delete; \
 	  mv "$$tmpdir/$*" $@; \
