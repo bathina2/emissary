@@ -65,8 +65,8 @@ refer both to Emissary-ingress and to the Ambassador Edge Stack.
    explicitly setting the API in the `TracingService` will no longer support the `HTTP_JSON_V1`
    value.
 
-   Users who rely on `HTTP_JSON_V1` will need to migrate their Emissary-ingress 2.3 install to use
-   to either `HTTP_JSON` or `HTTP_PROTO` before upgrading to Emissary-ingress 3.0.0.
+   Users who rely on `HTTP_JSON_V1` will need to migrate their Emissary-ingress 2.3 installation to
+   use to either `HTTP_JSON` or `HTTP_PROTO` before upgrading to Emissary-ingress 3.0.0.
 
 With the removal of `regex_type: unsafe` and `collector_endpoint_version: HTTP_JSON_V1`, there will
 be no more user-visible effects of the `AMBASSADOR_ENVOY_API_VERSION` environment variable, and so
@@ -96,7 +96,7 @@ it will be removed; but as it won't be user-visible this isn't considered a brea
   certificates against a certificate revocation list. ([#1743])
 
 - Feature: Previously, a `LogService` would always have Emissary-ingress communicate with the
-  external log servie using the `envoy.service.accesslog.v2.AccessLogService` API.  It is now
+  external log service using the `envoy.service.accesslog.v2.AccessLogService` API.  It is now
   possible for the `LogService` to specify `protocol_version: v3` to use the newer
   `envoy.service.accesslog.v3.AccessLogService` API instead.  This functionality is not available if
   you set the `AMBASSADOR_ENVOY_API_VERSION=V2` environment variable.

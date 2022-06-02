@@ -60,7 +60,7 @@ items:
         type: feature
         body: >-
           Previously, a <code>LogService</code> would always have $productName$ communicate with the
-          external log servie using the <code>envoy.service.accesslog.v2.AccessLogService</code>
+          external log service using the <code>envoy.service.accesslog.v2.AccessLogService</code>
           API.  It is now possible for the <code>LogService</code> to specify
           <code>protocol_version: v3</code> to use the newer
           <code>envoy.service.accesslog.v3.AccessLogService</code> API instead.  This functionality
