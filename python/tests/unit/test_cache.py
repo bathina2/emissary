@@ -129,7 +129,7 @@ class Builder:
                     "deltaType": "delete"
                 }
 
-    def build(self, version='V2') -> Tuple[IR, EnvoyConfig]:
+    def build(self) -> Tuple[IR, EnvoyConfig]:
         # Do a build, return IR & econf, but also stash them in self.builds.
 
         watt: Dict[str, Any] = {
@@ -190,7 +190,7 @@ class Builder:
 
         assert ir, "could not create an IR"
 
-        econf = EnvoyConfig.generate(ir, version, cache=self.cache)
+        econf = EnvoyConfig.generate(ir, cache=self.cache)
 
         assert econf, "could not create an econf"
 
