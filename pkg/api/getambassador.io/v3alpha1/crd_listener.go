@@ -132,6 +132,13 @@ type HostBindingType struct {
 	Selector  *metav1.LabelSelector `json:"selector,omitempty"`
 }
 
+//HTTP3Options provides options to set when a Listener is enabled to understand HTTP/3
+type HTTP3Options struct {
+	//AltSvc allows modifying the default `alt-svc` header that is attached to all HTTP/1 & HTTP/2 response indicating HTTP/3 support.
+	// +kubebuilder:default="h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400"
+	AltSvc string `json:"altSvc,omitempty"`
+}
+
 // ListenerSpec defines the desired state of this Port
 type ListenerSpec struct {
 	AmbassadorID AmbassadorID `json:"ambassador_id,omitempty"`
@@ -167,6 +174,11 @@ type ListenerSpec struct {
 	// HostBinding allows restricting which Hosts will be used for this Listener.
 	// +kubebuilder:validation:Required
 	HostBinding HostBindingType `json:"hostBinding"`
+
+	// HTTP3Options provides options for a Listener when HTTP is used in the ProtocolStackElement
+	// These options will be ignored when Listener does not include HTTP and will be used for
+	// both TCP and UDP Listeners
+	HTTP3Options HTTP3Options `json:"http3Options,omitempty"`
 }
 
 // Listener is the Schema for the hosts API
@@ -178,6 +190,7 @@ type ListenerSpec struct {
 // +kubebuilder:printcolumn:name="StatsPrefix",type=string,JSONPath=`.spec.statsPrefix`
 // +kubebuilder:printcolumn:name="Security",type=string,JSONPath=`.spec.securityModel`
 // +kubebuilder:printcolumn:name="L7Depth",type=string,JSONPath=`.spec.l7Depth`
+// +kubebuilder:printcolumn:name="HTTP3Options",type=string,JSONPath=`.spec.http3Options`
 // +kubebuilder:storageversion
 type Listener struct {
 	metav1.TypeMeta   `json:""`

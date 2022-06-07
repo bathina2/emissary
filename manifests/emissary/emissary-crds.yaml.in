@@ -1582,6 +1582,9 @@ spec:
     - jsonPath: .spec.l7Depth
       name: L7Depth
       type: string
+    - jsonPath: .spec.http3Options
+      name: HTTP3Options
+      type: string
     name: v3alpha1
     schema:
       openAPIV3Schema:
@@ -1674,6 +1677,19 @@ spec:
                           "value". The requirements are ANDed.
                         type: object
                     type: object
+                type: object
+              http3Options:
+                description: HTTP3Options provides options for a Listener when HTTP
+                  is used in the ProtocolStackElement These options will be ignored
+                  when Listener does not include HTTP and will be used for both TCP
+                  and UDP Listeners
+                properties:
+                  altSvc:
+                    default: h3=":443"; ma=86400, h3-29=":443"; ma=86400
+                    description: AltSvc allows modifying the default `alt-svc` header
+                      that is attached to all HTTP/1 & HTTP/2 response indicating
+                      HTTP/3 support.
+                    type: string
                 type: object
               l7Depth:
                 description: L7Depth specifies how many layer 7 load balancers are
