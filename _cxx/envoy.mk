@@ -13,7 +13,7 @@ RSYNC_EXTRAS ?=
 
 # IF YOU MESS WITH ANY OF THESE VALUES, YOU MUST RUN `make update-base`.
   ENVOY_REPO ?= $(if $(IS_PRIVATE),git@github.com:datawire/envoy-private.git,https://github.com/datawire/envoy.git)
-  ENVOY_COMMIT ?= 386367b8c99f843fbc2a42a38fe625fce480de19
+  ENVOY_COMMIT ?= c72eb91c03ebaf2d2c622e847cf6b4f0ba6c3528
   ENVOY_COMPILATION_MODE ?= opt
   # Increment BASE_ENVOY_RELVER on changes to `docker/base-envoy/Dockerfile`, or Envoy recipes.
   # You may reset BASE_ENVOY_RELVER when adjusting ENVOY_COMMIT.
